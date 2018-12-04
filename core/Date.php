@@ -123,13 +123,13 @@ class Date
             $dateString = $dateString->toString();
         }
         if ($dateString == 'now') {
-            $date = self::now();
+            return self::now($timezone);
         } elseif ($dateString == 'today') {
-            $date = self::today();
+            return self::today($timezone);
         } elseif ($dateString == 'yesterday') {
-            $date = self::yesterday();
+            return self::yesterday($timezone);
         } elseif ($dateString == 'yesterdaySameTime') {
-            $date = self::yesterdaySameTime();
+            return self::yesterdaySameTime($timezone);
         } elseif (!is_int($dateString)
             && (
                 // strtotime returns the timestamp for April 1st for a date like 2011-04-01,today
@@ -491,41 +491,49 @@ class Date
     /**
      * Returns a date object set to now in UTC (same as {@link today()}, except that the time is also set).
      *
+     * @param string $timezone The date's timezone.
      * @return \Piwik\Date
      */
-    public static function now()
+    public static function now($timezone = null)
     {
-        return new Date(time());
+        $dt = new \DateTime('now', $timezone ? new \DateTimeZone($timezone) : null);
+        return new Date($dt->getTimestamp());
     }
 
     /**
      * Returns a date object set to today at midnight in UTC.
      *
+     * @param string $timezone The date's timezone.
      * @return \Piwik\Date
      */
-    public static function today()
+    public static function today($timezone = null)
     {
-        return new Date(strtotime(date("Y-m-d 00:00:00")));
+        $dt = new \DateTime('today', $timezone ? new \DateTimeZone($timezone) : null);
+        return new Date($dt->getTimestamp());
     }
 
     /**
      * Returns a date object set to yesterday at midnight in UTC.
      *
+     * @param string $timezone The date's timezone.
      * @return \Piwik\Date
      */
-    public static function yesterday()
+    public static function yesterday($timezone = null)
     {
-        return new Date(strtotime("yesterday"));
+        $dt = new \DateTime('yesterday', $timezone ? new \DateTimeZone($timezone) : null);
+        return new Date($dt->getTimestamp());
     }
 
     /**
      * Returns a date object set to yesterday with the current time of day in UTC.
      *
+     * @param string $timezone The date's timezone.
      * @return \Piwik\Date
      */
-    public static function yesterdaySameTime()
+    public static function yesterdaySameTime($timezone = null)
     {
-        return new Date(strtotime("yesterday " . date('H:i:s')));
+        $dt = new \DateTime('yesterday', $timezone ? new \DateTimeZone($timezone) : null);
+        return new Date(strtotime($dt->format('Y-m-d') . date('H:i:s')));
     }
 
     /**
