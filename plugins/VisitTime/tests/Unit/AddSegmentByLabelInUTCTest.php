@@ -57,7 +57,7 @@ class AddSegmentByLabelInUTCTest extends \PHPUnit_Framework_TestCase
     public function test_filter_shouldConvertHoursFromTimezoneIntoUTC_Minus1()
     {
         $this->table->filter($this->filter, array('UTC-1', 'day', 'today'));
-        $this->assertSegmentValues(array('1', '2', '3', '13', '14', '15', '21'));
+        $this->assertSegmentValues(array('23', '0', '1', '11', '12', '13', '19'));
     }
 
     public function test_filter_shouldConvertHoursFromTimezoneIntoUTC_Plus1()
@@ -101,7 +101,7 @@ class AddSegmentByLabelInUTCTest extends \PHPUnit_Framework_TestCase
 
     private function assertSegmentValuesInUTCplus1()
     {
-        $this->assertSegmentValues(array('23', '0', '1', '11', '12', '13', '19'));
+        $this->assertSegmentValues(array('1', '2', '3', '13', '14', '15', '21'));
     }
 
     private function assertSegmentValues($expectedSegmentValues)

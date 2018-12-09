@@ -224,7 +224,7 @@ class Date
     public function getEndOfDay()
     {
         $dateEndUTC = gmdate('Y-m-d 23:59:59', $this->timestamp);
-        return Date::factory($dateEndUTC)->setTimezone($this->timezone);
+        return Date::factory($dateEndUTC, $this->timezone);
     }
 
     /**

@@ -158,7 +158,7 @@ class ArchiveProcessingTest extends IntegrationTestCase
      */
     public function testInitDayInPastNonUTCWebsite()
     {
-        $timezone = 'UTC+5.5';
+        $timezone = 'UTC-5.5';
         $archiveProcessor = $this->_createArchiveProcessor('day', '2010-01-01', $timezone);
         // min finished timestamp considered when looking at archive timestamp
         $dateMinArchived = Date::factory('2010-01-01 18:30:00');
@@ -174,7 +174,7 @@ class ArchiveProcessingTest extends IntegrationTestCase
      */
     public function testInitMonthInPastNonUTCWebsite()
     {
-        $timezone = 'UTC-5.5';
+        $timezone = 'UTC+5.5';
         $archiveProcessor = $this->_createArchiveProcessor('month', '2010-01-02', $timezone);
         // min finished timestamp considered when looking at archive timestamp
         $dateMinArchived = Date::factory('2010-02-01 05:30:00');
@@ -191,7 +191,7 @@ class ArchiveProcessingTest extends IntegrationTestCase
     public function testInitToday()
     {
         $now = time();
-        $siteTimezone = 'UTC-1';
+        $siteTimezone = 'UTC+1';
         $timestamp = Date::factory('now', $siteTimezone)->getTimestamp();
         $dateLabel = date('Y-m-d', $timestamp);
 
@@ -227,7 +227,7 @@ class ArchiveProcessingTest extends IntegrationTestCase
         }
 
         $now = time();
-        $siteTimezone = 'Europe/Paris';
+        $siteTimezone = 'Atlantic/Cape_Verde'; // == UTC-1
         $timestamp = Date::factory('now', $siteTimezone)->getTimestamp();
         $dateLabel = date('Y-m-d', $timestamp);
 
@@ -267,7 +267,7 @@ class ArchiveProcessingTest extends IntegrationTestCase
         }
 
         $now = time();
-        $siteTimezone = 'America/Toronto';
+        $siteTimezone = 'Antarctica/Mawson'; // UTC+5
         $timestamp = Date::factory('now', $siteTimezone)->getTimestamp();
         $dateLabel = date('Y-m-d', $timestamp);
 

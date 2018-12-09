@@ -107,10 +107,7 @@ class DateTest extends \PHPUnit_Framework_TestCase
             $date = Date::factory($now, 'America/New_York');
             $time = $date->getTimestamp();
             $this->assertTrue($time < $now);
-
-            $date = Date::factory($time)->setTimezone('America/New_York');
-            $time = $date->getTimestamp();
-            $this->assertEquals($now, $time);
+            $this->assertEquals($now, $date->getTimestampUTC());
         }
     }
 
@@ -120,19 +117,20 @@ class DateTest extends \PHPUnit_Framework_TestCase
         $hour = $date->getHourUTC();
         $this->assertSame('0', $hour); // hour is already in UTC
 
-        $date = Date::factory('today', 'UTC+10');
+        $date = Date::factory(strtotime('today'), 'UTC+10');
         $hour = $date->getHourUTC();
         $this->assertSame('10', $hour);
 
         $date = Date::factory('today');
-        $date = $date->setTime('14:00:00')->setTimezone('UTC+10'); // 14-10 = 4
+        $date = $date->setTime('10:00:00'); // 10:00 in UTC
+        $date = $date->setTimezone('UTC+10'); // convert to UTC+10, 10+10 = 20
         $hour = $date->getHourUTC();
-        $this->assertSame('4', $hour);
+        $this->assertSame('20', $hour);
 
         $date = Date::factory('today');
-        $date = $date->setTime('14:00:00')->setTimezone('UTC-5'); // 14+5 = 19
+        $date = $date->setTime('14:00:00')->setTimezone('UTC-5'); // 14-5 = 9
         $hour = $date->getHourUTC();
-        $this->assertSame('19', $hour);
+        $this->assertSame('9', $hour);
     }
 
     /**
@@ -158,28 +156,28 @@ class DateTest extends \PHPUnit_Framework_TestCase
 
         if (SettingsServer::isTimezoneSupportEnabled()) {
             $date = $date->setTimezone('Europe/Paris');
-            $utcDayStart = '2009-12-31 23:00:00';
-            $utcDayEnd = '2010-01-01 22:59:59';
+            $utcDayStart = '2010-01-01 01:00:00';
+            $utcDayEnd = '2010-01-02 00:59:59';
             $this->assertEquals($utcDayStart, $date->getDateStartUTC());
             $this->assertEquals($utcDayEnd, $date->getDateEndUTC());
         }
 
         $date = $date->setTimezone('UTC+1');
-        $utcDayStart = '2009-12-31 23:00:00';
-        $utcDayEnd = '2010-01-01 22:59:59';
-        $this->assertEquals($utcDayStart, $date->getDateStartUTC());
-        $this->assertEquals($utcDayEnd, $date->getDateEndUTC());
-
-        $date = $date->setTimezone('UTC-1');
         $utcDayStart = '2010-01-01 01:00:00';
         $utcDayEnd = '2010-01-02 00:59:59';
         $this->assertEquals($utcDayStart, $date->getDateStartUTC());
         $this->assertEquals($utcDayEnd, $date->getDateEndUTC());
 
+        $date = $date->setTimezone('UTC-1');
+        $utcDayStart = '2009-12-31 23:00:00';
+        $utcDayEnd = '2010-01-01 22:59:59';
+        $this->assertEquals($utcDayStart, $date->getDateStartUTC());
+        $this->assertEquals($utcDayEnd, $date->getDateEndUTC());
+
         if (SettingsServer::isTimezoneSupportEnabled()) {
             $date = $date->setTimezone('America/Vancouver');
-            $utcDayStart = '2010-01-01 08:00:00';
-            $utcDayEnd = '2010-01-02 07:59:59';
+            $utcDayStart = '2009-12-31 16:00:00';
+            $utcDayEnd = '2010-01-01 15:59:59';
             $this->assertEquals($utcDayStart, $date->getDateStartUTC());
             $this->assertEquals($utcDayEnd, $date->getDateEndUTC());
         }
@@ -215,8 +213,8 @@ class DateTest extends \PHPUnit_Framework_TestCase
             $date = Date::factory('2010-03-28');
 
             $date = $date->setTimezone('Europe/Paris');
-            $utcDayStart = '2010-03-27 23:00:00';
-            $utcDayEnd = '2010-03-28 21:59:59';
+            $utcDayStart = '2010-03-28 01:00:00';
+            $utcDayEnd = '2010-03-29 01:59:59';
 
             $this->assertEquals($utcDayStart, $date->getDateStartUTC());
             $this->assertEquals($utcDayEnd, $date->getDateEndUTC());
