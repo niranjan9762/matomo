@@ -334,7 +334,7 @@ PageRenderer.prototype._setupWebpageEvents = function () {
         }
 
         if (VERBOSE) {
-            this._logMessage('Requesting resource (#' + requestData.id + 'URL:' + url + ')');
+            this._logMessage('Requesting resource (#' + request.id + 'URL:' + url + ')');
         }
     });
 
