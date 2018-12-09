@@ -55,6 +55,9 @@ class Date
     const DATE_FORMAT_YEAR        = DateTimeFormatProvider::DATE_FORMAT_YEAR;
     const TIME_FORMAT             = DateTimeFormatProvider::TIME_FORMAT;
 
+    // for tests
+    public static $now = null;
+
     /**
      * Max days for months (non-leap-year). See {@link addPeriod()} implementation.
      *
@@ -471,7 +474,7 @@ class Date
      */
     public static function now($timezone = null)
     {
-        return new Date(time(), $timezone);
+        return new Date(self::getNowTimestamp(), $timezone);
     }
 
     /**
@@ -487,7 +490,7 @@ class Date
         $todayForTimezone = strtotime(date("Y-m-d 00:00:00", $adjustedNowForTimezone));
 
         // get the UTC timestamp for $todayForTimezone & use in date
-        $todayForTimezoneInUtc = time() - ($adjustedNowForTimezone - $todayForTimezone);
+        $todayForTimezoneInUtc = self::getNowTimestamp() - ($adjustedNowForTimezone - $todayForTimezone);
         return new Date($todayForTimezoneInUtc, $timezone);
     }
 
@@ -986,5 +989,10 @@ class Date
     {
         $message = Piwik::translate('General_ExceptionInvalidDateFormat', array("YYYY-MM-DD, or 'today' or 'yesterday'", "strtotime", "http://php.net/strtotime"));
         return new Exception($message . ": $dateString");
+    }
+
+    private static function getNowTimestamp()
+    {
+        return isset(self::$now) ? self::$now : time();
     }
 }
