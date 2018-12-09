@@ -111,8 +111,7 @@ class Date
      *
      * @param string|int $dateString `'today'`, `'yesterday'`, `'now'`, `'yesterdaySameTime'`, a string with
      *                               `'YYYY-MM-DD HH:MM:SS'` format or a unix timestamp.
-     * @param string $timezone The timezone of the result. If specified, `$dateString` will be converted
-     *                         from UTC to this timezone before being used in the Date return value.
+     * @param string $timezone The timezone of the result.
      * @throws Exception If `$dateString` is in an invalid format or if the time is before
      *                   Tue, 06 Aug 1991.
      * @return Date
@@ -123,13 +122,13 @@ class Date
             $dateString = $dateString->toString();
         }
         if ($dateString == 'now') {
-            return self::now($timezone);
+            $date = self::now($timezone);
         } elseif ($dateString == 'today') {
-            return self::today($timezone);
+            $date = self::today($timezone);
         } elseif ($dateString == 'yesterday') {
-            return self::yesterday($timezone);
+            $date = self::yesterday($timezone);
         } elseif ($dateString == 'yesterdaySameTime') {
-            return self::yesterdaySameTime($timezone);
+            $date = self::yesterdaySameTime($timezone);
         } elseif (!is_int($dateString)
             && (
                 // strtotime returns the timestamp for April 1st for a date like 2011-04-01,today
@@ -141,10 +140,10 @@ class Date
         ) {
             throw self::getInvalidDateFormatException($dateString);
         } else {
-            $date = new Date($dateString);
+            $date = new Date($dateString, $timezone);
         }
+
         $timestamp = $date->getTimestamp();
-    
         if ($timestamp < self::FIRST_WEBSITE_TIMESTAMP) {
             $dateOfFirstWebsite = new self(self::FIRST_WEBSITE_TIMESTAMP);
             $message = Piwik::translate('General_ExceptionInvalidDateBeforeFirstWebsite', array(
@@ -155,12 +154,7 @@ class Date
             throw new Exception($message . ": $dateString");
         }
         
-        if (empty($timezone)) {
-            return $date;
-        }
-
-        $timestamp = self::adjustForTimezone($timestamp, $timezone);
-        return Date::factory($timestamp);
+        return $date;
     }
 
     /**
@@ -472,29 +466,35 @@ class Date
     /**
      * Returns a date object set to now in UTC (same as {@link today()}, except that the time is also set).
      *
-     * @param string $timezone The date's timezone.
+     * @param string $timezone The timezone of the result.
      * @return \Piwik\Date
      */
     public static function now($timezone = null)
     {
-        return new Date(strtotime('now'), $timezone);
+        return new Date(time(), $timezone);
     }
 
     /**
      * Returns a date object set to today at midnight in UTC.
      *
-     * @param string $timezone The date's timezone.
+     * @param string $timezone The timezone of the result.
      * @return \Piwik\Date
      */
     public static function today($timezone = null)
     {
-        return self::now($timezone)->getStartOfDay();
+        // get the timestamp for today in $timezone
+        $adjustedNowForTimezone = self::now($timezone)->getTimestamp();
+        $todayForTimezone = strtotime(date("Y-m-d 00:00:00", $adjustedNowForTimezone));
+
+        // get the UTC timestamp for $todayForTimezone & use in date
+        $todayForTimezoneInUtc = time() - ($adjustedNowForTimezone - $todayForTimezone);
+        return new Date($todayForTimezoneInUtc, $timezone);
     }
 
     /**
      * Returns a date object set to yesterday at midnight in UTC.
      *
-     * @param string $timezone The date's timezone.
+     * @param string $timezone The timezone of the result.
      * @return \Piwik\Date
      */
     public static function yesterday($timezone = null)
@@ -505,7 +505,7 @@ class Date
     /**
      * Returns a date object set to yesterday with the current time of day in UTC.
      *
-     * @param string $timezone The date's timezone.
+     * @param string $timezone The timezone of the result.
      * @return \Piwik\Date
      */
     public static function yesterdaySameTime($timezone = null)
