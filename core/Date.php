@@ -340,26 +340,7 @@ class Date
         if (empty($this->timezone)) {
             $this->timezone = 'UTC';
         }
-        $utcOffset = self::extractUtcOffset($this->timezone);
-        if ($utcOffset !== false) {
-            return (int)($this->timestamp - $utcOffset * 3600);
-        }
-        // The following code seems clunky - I thought the DateTime php class would allow to return timestamps
-        // after applying the timezone offset. Instead, the underlying timestamp is not changed.
-        // I decided to get the date without the timezone information, and create the timestamp from the truncated string.
-        // Unit tests pass (@see Date.test.php) but I'm pretty sure this is not the right way to do it
-        date_default_timezone_set($this->timezone);
-        $dtzone = timezone_open('UTC');
-        $time   = date('r', $this->timestamp);
-        $dtime  = date_create($time);
-
-        date_timezone_set($dtime, $dtzone);
-        $dateWithTimezone    = date_format($dtime, 'r');
-        $dateWithoutTimezone = substr($dateWithTimezone, 0, -6);
-        $timestamp           = strtotime($dateWithoutTimezone);
-        date_default_timezone_set('UTC');
-
-        return (int) $timestamp;
+        return self::adjustForTimezone($this->timestamp, $this->timezone);
     }
 
     /**
@@ -496,8 +477,7 @@ class Date
      */
     public static function now($timezone = null)
     {
-        $dt = new \DateTime('now', $timezone ? new \DateTimeZone($timezone) : null);
-        return new Date($dt->getTimestamp());
+        return new Date(strtotime('now'), $timezone);
     }
 
     /**
@@ -508,8 +488,7 @@ class Date
      */
     public static function today($timezone = null)
     {
-        $dt = new \DateTime('today', $timezone ? new \DateTimeZone($timezone) : null);
-        return new Date($dt->getTimestamp());
+        return self::now($timezone)->getStartOfDay();
     }
 
     /**
@@ -520,8 +499,7 @@ class Date
      */
     public static function yesterday($timezone = null)
     {
-        $dt = new \DateTime('yesterday', $timezone ? new \DateTimeZone($timezone) : null);
-        return new Date($dt->getTimestamp());
+        return self::today($timezone)->subDay(1);
     }
 
     /**
@@ -532,8 +510,7 @@ class Date
      */
     public static function yesterdaySameTime($timezone = null)
     {
-        $dt = new \DateTime('yesterday', $timezone ? new \DateTimeZone($timezone) : null);
-        return new Date(strtotime($dt->format('Y-m-d') . date('H:i:s')));
+        return self::now($timezone)->subDay(1);
     }
 
     /**
